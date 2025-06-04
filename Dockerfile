@@ -14,6 +14,7 @@ COPY --from=builder /app/build /usr/share/nginx/html
 
 # Copy nginx config
 COPY nginx/nginx.conf /etc/nginx/conf.d/default.conf
+RUN ls -l /etc/nginx/conf.d
 
 # Expose HTTP and HTTPS
 EXPOSE 80
