@@ -41,6 +41,8 @@ jobs:
           node-version: 18
 
       - name: Install dependencies
+        env:
+          NODE_ENV: development
         run: npm ci
 
       - name: Run tests
