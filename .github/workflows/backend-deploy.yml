@@ -65,6 +65,12 @@ jobs:
         working-directory: ./backend-infrastructure
         run: npm ci
 
+      - name: Show Pulumi config
+        run: pulumi config
+        working-directory: ./backend-infrastructure
+        env:
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+
       - name: Deploy backend to EKS with Pulumi
         uses: pulumi/actions@v4
         with:
