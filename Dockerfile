@@ -6,6 +6,10 @@ RUN npm install
 COPY . .
 RUN npm run build
 
-FROM nginx:alpine
-COPY --from=builder /app/build /usr/share/nginx/html
-CMD ["nginx", "-g", "daemon off;"]
+# Serve stage
+FROM node:18-alpine
+RUN npm install -g serve
+WORKDIR /app
+COPY --from=builder /app/build .
+EXPOSE 80
+CMD ["serve", "-s", ".", "-l", "80"]
