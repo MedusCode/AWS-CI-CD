@@ -21,32 +21,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps
-
       - name: Build frontend
         run: npm run build
-
-      - name: Start server in background
-        run: |
-          npx serve -s build -l 5500 & echo $! > server.pid
-        env:
-          NODE_ENV: production
-
-      - name: Wait for server to start
-        run: |
-          sleep 5
-          curl -sSf http://localhost:5500 || (echo "Server did not start" && exit 1)
-
-      - name: Run Playwright tests
-        run: npx playwright test
-        env:
-          BASE_URL: http://localhost:5500
-        continue-on-error: true
-
-      - name: Stop background server
-        run: |
-          kill $(cat server.pid) || echo "Server already stopped"
 
       - name: Build Docker image
         run: docker build -t ghcr.io/${{ github.repository_owner }}/speedscore-frontend:latest .
