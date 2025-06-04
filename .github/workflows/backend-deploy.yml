@@ -63,7 +63,7 @@ jobs:
 
       - name: Install Pulumi dependencies
         working-directory: ./backend-infrastructure
-        run: npm install
+        run: npm ci
 
       - name: Deploy backend to EKS with Pulumi
         uses: pulumi/actions@v4
