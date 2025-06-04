@@ -65,6 +65,19 @@ jobs:
         working-directory: ./backend-infrastructure
         run: npm ci
 
+      - name: Configure Pulumi stack
+        working-directory: ./backend-infrastructure
+        run: |
+          pulumi stack select dev
+          pulumi config set aws:region us-west-2
+          pulumi config set --secret speedscore_backend:certificateArn "${{ secrets.CERTIFICATE_ARN }}"
+          pulumi config set --secret speedscore_backend:jwtSecret "${{ secrets.JWT_SECRET }}"
+          pulumi config set --secret speedscore_backend:mongodbUri "${{ secrets.MONGODB_URI }}"
+          pulumi config set --secret speedscore_backend:github_token "${{ secrets.TOKEN }}"
+          pulumi config set --secret speedscore_backend:github_username meduscode
+        env:
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+
       - name: Show Pulumi config
         run: pulumi config --stack dev
         working-directory: ./backend-infrastructure
