@@ -2,7 +2,7 @@
  * @file: server.js
  * @desc: Defines the main server code for SpeedScore's API.
   *************************************************************************/
-  
+
 import dotenv from 'dotenv';
 dotenv.config();
 export const githubConfig = {
@@ -24,12 +24,12 @@ import userRouter from './routes/userRoutes.js';
 import roundRouter from './routes/roundRoutes.js';
 import authRouter from './routes/authRoutes.js';
 import errorHandler from './middleware/errorHandler.js';
-import rateLimiter from './middleware/rateLimiter.js';
+import rateLimiter from './middleware/ratelimiter.js';
 import setupSwagger from './swagger.js';
 
 
 
-sgMail.setApiKey(process.env.SENDGRID_API_KEY); 
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 const connectStr = process.env.MONGODB_URI;
 const isProduction = process.env.NODE_ENV === 'production';
@@ -67,7 +67,7 @@ if (isProduction) {
   app.set('trust proxy', 1); // Trust the first proxy
 }
 
-const mongoStore = new MongoStore({ 
+const mongoStore = new MongoStore({
   clientPromise: mongoClient.connect(),
   collectionName: 'sessions'
 });
@@ -78,7 +78,7 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   store: mongoStore,
-  cookie: { secure: isProduction, 
+  cookie: { secure: isProduction,
             sameSite: isProduction ? 'None' : false, // SameSite=None in production, disable SameSite in development
             httpOnly: true,}
 }));
