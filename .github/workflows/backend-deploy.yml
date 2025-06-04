@@ -74,7 +74,8 @@ jobs:
           pulumi config set --secret speedscore_backend:jwtSecret "${{ secrets.JWT_SECRET }}"
           pulumi config set --secret speedscore_backend:mongodbUri "${{ secrets.MONGODB_URI }}"
           pulumi config set --secret speedscore_backend:github_token "${{ secrets.TOKEN }}"
-          pulumi config set --secret speedscore_backend:github_username meduscode
+          pulumi config set --secret speedscore_backend:github_actions_role_arn "${{ secrets.GH_ACTIONS_ROLE_ARN }}"
+          pulumi config set speedscore_backend:github_username meduscode
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
 

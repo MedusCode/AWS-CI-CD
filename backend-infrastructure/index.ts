@@ -10,6 +10,7 @@ const jwtSecret = config.requireSecret("jwtSecret");
 const mongodbUri = config.requireSecret("mongodbUri");
 const githubUsername = config.require("github_username");
 const githubToken = config.requireSecret("github_token");
+const githubActionsRoleArn = config.require("github_actions_role_arn");
 
 // AWS Provider (region us-west-2)
 const awsProvider = new aws.Provider("aws-provider", {
@@ -25,7 +26,7 @@ const cluster = new eks.Cluster("speedscore-cluster", {
   maxSize: 3,
   roleMappings: [
     {
-      roleArn: config.require("github_actions_role_arn"),
+      roleArn: githubActionsRoleArn,
       username: "github",
       groups: ["system:masters"],
     },
