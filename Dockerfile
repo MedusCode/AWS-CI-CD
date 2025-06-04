@@ -15,10 +15,6 @@ COPY --from=builder /app/build /usr/share/nginx/html
 # Copy nginx config
 COPY nginx/default.conf /etc/nginx/conf.d/default.conf
 
-# Copy SSL certs
-COPY ssl/cert.pem /etc/nginx/ssl/cert.pem
-COPY ssl/key.pem /etc/nginx/ssl/key.pem
-
 # Expose HTTP and HTTPS
 EXPOSE 80
 EXPOSE 443
