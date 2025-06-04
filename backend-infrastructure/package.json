@@ -1,0 +1,16 @@
+{
+    "name": "speedscore_backend",
+    "main": "index.ts",
+    "devDependencies": {
+        "@types/node": "^18",
+        "typescript": "^5.0.0"
+    },
+    "dependencies": {
+        "@pulumi/aws": "^6.0.0",
+        "@pulumi/awsx": "^2.0.2",
+        "@pulumi/eks": "^3.9.1",
+        "@pulumi/kubernetes": "^4.23.0",
+        "@pulumi/mongodbatlas": "^3.32.1",
+        "@pulumi/pulumi": "^3.113.0"
+    }
+}

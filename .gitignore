@@ -1,0 +1,6 @@
+.env
+node_modules/
+ChrisWebDevBookAPIKey.pem
+.ssh/
+build/
+.idea/
