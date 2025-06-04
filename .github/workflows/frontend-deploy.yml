@@ -1,0 +1,53 @@
+name: Frontend Deploy
+
+on:
+  push:
+    branches:
+      - frontend-deploy
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies and run tests
+        run: |
+          npm ci
+          npm run test
+
+      - name: Build Docker image
+        run: docker build -t ghcr.io/${{ github.repository_owner }}/speedscore-frontend:latest .
+
+      - name: Login to GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
+
+      - name: Push Docker image
+        run: docker push ghcr.io/${{ github.repository_owner }}/speedscore-frontend:latest
+
+      - name: Decode SSL cert
+        run: |
+          echo "${{ secrets.CERT_PEM_B64 }}" | base64 -d > cert.pem
+          echo "${{ secrets.KEY_PEM_B64 }}" | base64 -d > key.pem
+
+      - name: Move certs into ansible folder
+        run: |
+          mkdir -p ansible/ssl
+          mv cert.pem ansible/ssl/cert.pem
+          mv key.pem ansible/ssl/key.pem
+
+      - name: Run Ansible Playbook
+        uses: dawidd6/action-ansible-playbook@v2
+        with:
+          playbook: ansible/frontend-deploy.yml
+          inventory: "<ec2-public-ip>,"
+          options: |
+            --private-key ~/.ssh/id_rsa
+            -u ubuntu

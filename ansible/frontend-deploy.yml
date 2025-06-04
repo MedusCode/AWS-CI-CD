@@ -1,0 +1,92 @@
+---
+- name: Deploy SpeedScore Frontend
+  hosts: all
+  become: true
+
+  vars:
+    app_directory: /home/ubuntu/speedscore-frontend
+    domain_name: speedscore.medus.click
+  vars_files:
+    - vars/secrets.yml
+
+  tasks:
+    - name: Install dependencies
+      apt:
+        name:
+          - docker.io
+          - docker-compose
+          - python3-pip
+        update_cache: yes
+        state: present
+
+    - name: Ensure Docker service is running
+      service:
+        name: docker
+        state: started
+        enabled: true
+
+    - name: Add user to docker group
+      user:
+        name: ubuntu
+        groups: docker
+        append: yes
+
+    - name: Create app directory
+      file:
+        path: "{{ app_directory }}"
+        state: directory
+        owner: ubuntu
+        group: ubuntu
+        mode: '0755'
+
+    - name: Copy docker-compose.yml
+      copy:
+        src: ../docker-compose.yml
+        dest: "{{ app_directory }}/docker-compose.yml"
+        owner: ubuntu
+        group: ubuntu
+        mode: '0644'
+
+    - name: Create SSL directory
+      file:
+        path: /etc/nginx/ssl
+        state: directory
+        mode: '0755'
+
+    - name: Copy SSL certificate
+      copy:
+        src: ssl/cert.pem
+        dest: /etc/nginx/ssl/cert.pem
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Copy SSL private key
+      copy:
+        src: ssl/key.pem
+        dest: /etc/nginx/ssl/key.pem
+        owner: root
+        group: root
+        mode: '0600'
+
+    - name: Login to GitHub Container Registry
+      docker_login:
+        registry_url: ghcr.io
+        username: "{{ github_username }}"
+        password: "{{ github_token }}"
+
+    - name: Pull frontend image
+      docker_image:
+        name: "ghcr.io/{{ github_username }}/speedscore-frontend:latest"
+        source: pull
+
+    - name: Run frontend container
+      docker_container:
+        name: speedscore-frontend
+        image: "ghcr.io/{{ github_username }}/speedscore-frontend:latest"
+        restart_policy: always
+        ports:
+          - "80:80"
+          - "443:443"
+        state: started
+        recreate: true
