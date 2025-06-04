@@ -61,6 +61,10 @@ jobs:
           docker build -t ghcr.io/meduscode/speedscore-api:latest .
           docker push ghcr.io/meduscode/speedscore-api:latest
 
+      - name: Install Pulumi dependencies
+        working-directory: ./backend-infrastructure
+        run: npm install
+
       - name: Deploy backend to EKS with Pulumi
         uses: pulumi/actions@v4
         with:
