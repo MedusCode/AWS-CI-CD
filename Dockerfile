@@ -6,10 +6,21 @@ RUN npm install
 COPY . .
 RUN npm run build
 
-# Serve stage
-FROM node:18-alpine
-RUN npm install -g serve
-WORKDIR /app
-COPY --from=builder /app/build .
+# Production stage
+FROM nginx:alpine
+
+# Copy built frontend
+COPY --from=builder /app/build /usr/share/nginx/html
+
+# Copy nginx config
+COPY nginx/default.conf /etc/nginx/conf.d/default.conf
+
+# Copy SSL certs
+COPY ssl/cert.pem /etc/nginx/ssl/cert.pem
+COPY ssl/key.pem /etc/nginx/ssl/key.pem
+
+# Expose HTTP and HTTPS
 EXPOSE 80
-CMD ["serve", "-s", ".", "-l", "80"]
+EXPOSE 443
+
+CMD ["nginx", "-g", "daemon off;"]
