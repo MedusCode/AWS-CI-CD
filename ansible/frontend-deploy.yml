@@ -6,8 +6,6 @@
   vars:
     app_directory: /home/ubuntu/speedscore-frontend
     domain_name: speedscore.medus.click
-  vars_files:
-    - vars/secrets.yml
 
   tasks:
     - name: Install dependencies
