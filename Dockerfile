@@ -6,18 +6,10 @@ RUN npm install
 COPY . .
 RUN npm run build
 
-# Production stage
-FROM nginx:alpine
-
-# Copy built frontend
-COPY --from=builder /app/build /usr/share/nginx/html
-
-# Copy nginx config
-COPY nginx/nginx.conf /etc/nginx/conf.d/default.conf
-RUN ls -l /etc/nginx/conf.d
-
-# Expose HTTP and HTTPS
+# Serve stage
+FROM node:18-alpine
+RUN npm install -g serve
+WORKDIR /app
+COPY --from=builder /app/build .
 EXPOSE 80
-EXPOSE 443
-
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["serve", "-s", ".", "-l", "80"]
