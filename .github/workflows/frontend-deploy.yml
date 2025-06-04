@@ -41,6 +41,23 @@ jobs:
           mv cert.pem ansible/ssl/cert.pem
           mv key.pem ansible/ssl/key.pem
 
+      - name: Restore SSH private key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+      - name: Use Pulumi to provision or update the infrastructure
+        uses: pulumi/actions@v4
+        with:
+          command: up
+          stack-name: MedusCode-org/frontend-infrastructure/dev
+          work-dir: frontend-infrastructure/
+        env:
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
       - name: Run Ansible Playbook
         uses: dawidd6/action-ansible-playbook@v2
         with:
