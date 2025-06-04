@@ -1,6 +1,6 @@
 /***************************************************************************************
  * @file: registerUser.test.js
- * @desc: Test the /auth/register and /auth/login and /auth/verify-email routes. 
+ * @desc: Test the /auth/register and /auth/login and /auth/verify-email routes.
  *        We use /auth/login to verify that a user's account is activated.
  *        We use /users/:userId to delete the user we created.
  **************************************************************************************/
@@ -36,7 +36,7 @@ const newUsersInvalidEmailAndPassword = Array(numTestRounds).fill(null).map(() =
 }));
 
 //Variables used in tests
-let testSession, mockSendVerificationEmail; 
+let testSession, mockSendVerificationEmail;
 
 // Describe the test suite
 describe('Test routes to register new users and verify their email addresses', () => {
@@ -47,7 +47,7 @@ describe('Test routes to register new users and verify their email addresses', (
     mockSendVerificationEmail = jest.spyOn(emailService, 'sendVerificationEmail');
     mockSendVerificationEmail.mockImplementation((email, verificationToken) => null);
   });
- 
+
   // After each test, clear all timers
   afterEach(() => {
     jest.clearAllTimers(); // Clear all timers after each test
@@ -96,7 +96,7 @@ describe('Test routes to register new users and verify their email addresses', (
     it('should re-send verification email to valid, registered user', async () => {
       await requestResendVerificationEmail(testSession, newUsers[i].email, true);
     });
-    
+
     //Test the /auth/verify-email route with invalid token
     it('should not verify user email with invalid token', async () => {
       await verifyAccountEmail(mockSendVerificationEmail, false);
