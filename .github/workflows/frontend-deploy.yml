@@ -70,7 +70,7 @@ jobs:
         uses: dawidd6/action-ansible-playbook@v2
         with:
           playbook: ansible/frontend-deploy.yml
-          inventory: "${{ env.INSTANCE_IP }},"
+          inventory: "${{ env.INSTANCE_IP }}"
           options: |
             --private-key ~/.ssh/id_rsa
             -u ubuntu
