@@ -70,4 +70,4 @@ jobs:
         with:
           work-dir: ./backend-infrastructure
           command: up
-          stack-name: MedusCode-org/backend-infrastructure/dev
+          stack-name: MedusCode-org/speedscore_backend/dev
