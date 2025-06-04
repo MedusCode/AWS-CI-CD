@@ -88,3 +88,6 @@
           - "443:443"
         state: started
         recreate: true
+        volumes:
+          - /etc/nginx/ssl/cert.pem:/etc/nginx/ssl/cert.pem:ro
+          - /etc/nginx/ssl/key.pem:/etc/nginx/ssl/key.pem:ro
