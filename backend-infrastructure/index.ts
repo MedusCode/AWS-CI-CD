@@ -6,15 +6,20 @@ import * as k8s from "@pulumi/kubernetes";
 // Load config values
 const config = new pulumi.Config();
 
-const nodeEnv = config.require("nodeEnv");
-const port = config.require("port")
+const certificateArn = config.requireSecret("certificateArn");
+const githubActionRoleArn = config.requireSecret("githubActionRoleArn");
+const githubToken = config.requireSecret("githubToken");
+const githubUsername = config.requireSecret("githubUsername");
 const subDomain = config.require("subDomain");
 const domain = config.require("domain");
+
+const nodeEnv = config.require("nodeEnv");
+const port = config.require("port")
 const clientDeploymentUrl = config.require("clientDeploymentUrl");
 const accessTokenDuration = config.require("accessTokenDuration");
 const refreshTokenDuration = config.require("refreshTokenDuration");
 const sendgridFromAddress = config.require("sendgridFromAddress");
-
+const cookieDomain = config.require("cookieDomain");
 const sessionSecret = config.requireSecret("sessionSecret");
 const jwtSecret = config.requireSecret("jwtSecret");
 const mongodbUri = config.requireSecret("mongodbUri");
@@ -22,11 +27,6 @@ const mfaEncryptionKey = config.requireSecret("mfaEncryptionKey");
 const sendgridApiKey = config.requireSecret("sendgridApiKey");
 const ghClientId = config.requireSecret("ghClientId");
 const ghClientSecret = config.requireSecret("ghClientSecret");
-const certificateArn = config.requireSecret("certificateArn");
-const githubActionRoleArn = config.requireSecret("githubActionRoleArn");
-const githubToken = config.requireSecret("githubToken");
-const githubEmail = config.requireSecret("githubEmail");
-const githubUsername = config.requireSecret("githubUsername");
 
 // AWS provider (region us-west-2)
 const awsProvider = new aws.Provider("aws-provider", {
@@ -95,7 +95,7 @@ const apiEnvVars = [
   { name: "ACCESS_TOKEN_DURATION", value: accessTokenDuration },
   { name: "REFRESH_TOKEN_DURATION", value: refreshTokenDuration },
   { name: "SENDGRID_FROM_ADDRESS", value: sendgridFromAddress },
-  { name: "COOKIE_DOMAIN", value: domain },
+  { name: "COOKIE_DOMAIN", value: cookieDomain },
 
   { name: "JWT_SECRET", valueFrom: { secretKeyRef: { name: "api-secrets", key: "jwtSecret" } } },
   { name: "MONGODB_URI", valueFrom: { secretKeyRef: { name: "api-secrets", key: "mongodbUri" } } },
@@ -104,11 +104,6 @@ const apiEnvVars = [
   { name: "SENDGRID_API_KEY", valueFrom: { secretKeyRef: { name: "api-secrets", key: "sendgridApiKey" } } },
   { name: "GH_CLIENT_ID", valueFrom: { secretKeyRef: { name: "api-secrets", key: "ghClientId" } } },
   { name: "GH_CLIENT_SECRET", valueFrom: { secretKeyRef: { name: "api-secrets", key: "ghClientSecret" } } },
-  { name: "certificateArn", valueFrom: { secretKeyRef: { name: "api-secrets", key: "certificateArn" } } },
-  { name: "github_actions_role_arn", valueFrom: { secretKeyRef: { name: "api-secrets", key: "githubActionRoleArn" } } },
-  { name: "github_token", valueFrom: { secretKeyRef: { name: "api-secrets", key: "githubToken" } } },
-  { name: "github_email", valueFrom: { secretKeyRef: { name: "api-secrets", key: "githubEmail" } } },
-  { name: "github_username", valueFrom: { secretKeyRef: { name: "api-secrets", key: "githubUsername" } } },
 ];
 
 // Secrets
@@ -125,11 +120,6 @@ const apiSecrets = new k8s.core.v1.Secret("api-secrets", {
     sendgridApiKey: sendgridApiKey,
     ghClientId: ghClientId,
     ghClientSecret: ghClientSecret,
-    certificateArn: certificateArn,
-    githubActionRoleArn: githubActionRoleArn,
-    githubToken: githubToken,
-    githubEmail: githubEmail,
-    githubUsername: githubUsername,
   },
 }, { provider: k8sProvider });
 

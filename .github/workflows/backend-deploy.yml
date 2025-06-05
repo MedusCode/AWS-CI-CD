@@ -14,8 +14,7 @@ env:
   NODE_ENV: production
   API_DEPLOYMENT_URL: https://api.medus.click
   CLIENT_DEPLOYMENT_URL: https://speedscore.medus.click
-  COOKIE_DOMAIN: medus.click
-  SUB_DOMAIN: api
+  COOKIE_DOMAIN: .medus.click
   ACCESS_TOKEN_DURATION: 1d
   REFRESH_TOKEN_DURATION: 7d
   SENDGRID_FROM_ADDRESS: cs14394go@gmail.com
@@ -28,9 +27,10 @@ env:
   GH_CLIENT_SECRET: ${{ secrets.GH_CLIENT_SECRET }}
   certificateArn: ${{ secrets.CERTIFICATE_ARN }}
   github_actions_role_arn: ${{ secrets.GH_ACTIONS_ROLE_ARN }}
-  github_email: ${{ secrets.GH_EMAIL }}
   github_token: ${{ secrets.TOKEN }}
   github_username: meduscode
+  domain: medus.click
+  sub_domain: api
   PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
 
 jobs:
@@ -100,16 +100,20 @@ jobs:
           pulumi stack select dev
           pulumi config set aws:region us-west-2
           
+          pulumi config set speedscore_backend:subDomain $sub_domain
+          pulumi config set speedscore_backend:domain $domain
+          pulumi config set --secret speedscore_backend:certificateArn "$certificateArn"
+          pulumi config set --secret speedscore_backend:githubToken "$github_token"
+          pulumi config set --secret speedscore_backend:githubActionRoleArn "$github_actions_role_arn"
+          pulumi config set --secret speedscore_backend:githubUsername $github_username
+          
           pulumi config set speedscore_backend:nodeEnv $NODE_ENV
           pulumi config set speedscore_backend:port $PORT
-          pulumi config set speedscore_backend:subDomain $SUB_DOMAIN
-          pulumi config set speedscore_backend:domain $COOKIE_DOMAIN
+          pulumi config set speedscore_backend:cookieDomain $COOKIE_DOMAIN
           pulumi config set speedscore_backend:clientDeploymentUrl $CLIENT_DEPLOYMENT_URL
           pulumi config set speedscore_backend:accessTokenDuration $ACCESS_TOKEN_DURATION
           pulumi config set speedscore_backend:refreshTokenDuration $REFRESH_TOKEN_DURATION
           pulumi config set speedscore_backend:sendgridFromAddress $SENDGRID_FROM_ADDRESS
-          
-          pulumi config set --secret speedscore_backend:githubUsername $github_username
           pulumi config set --secret speedscore_backend:jwtSecret "$JWT_SECRET"
           pulumi config set --secret speedscore_backend:mongodbUri "$MONGODB_URI"
           pulumi config set --secret speedscore_backend:sessionSecret "$SESSION_SECRET"
@@ -117,10 +121,6 @@ jobs:
           pulumi config set --secret speedscore_backend:sendgridApiKey "$SENDGRID_API_KEY"
           pulumi config set --secret speedscore_backend:ghClientId "$GH_CLIENT_ID"
           pulumi config set --secret speedscore_backend:ghClientSecret "$GH_CLIENT_SECRET"
-          pulumi config set --secret speedscore_backend:githubEmail "$github_email"
-          pulumi config set --secret speedscore_backend:certificateArn "$certificateArn"
-          pulumi config set --secret speedscore_backend:githubToken "$github_token"
-          pulumi config set --secret speedscore_backend:githubActionRoleArn "$github_actions_role_arn"
 
       - name: Deploy to EKS
         uses: pulumi/actions@v4
