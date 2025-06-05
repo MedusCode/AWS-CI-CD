@@ -4,7 +4,6 @@
   become: true
 
   vars:
-    app_directory: "{{ lookup('env', 'APP_DIRECTORY') }}"
     github_username: "{{ lookup('env', 'GITHUB_USERNAME') }}"
     github_token: "{{ lookup('env', 'GITHUB_TOKEN') }}"
 
@@ -32,7 +31,7 @@
 
     - name: Create app directory
       file:
-        path: "{{ app_directory }}"
+        path: "/home/ubuntu/speedscore-frontend"
         state: directory
         owner: ubuntu
         group: ubuntu
@@ -41,7 +40,7 @@
     - name: Copy docker-compose.yml
       copy:
         src: ../docker-compose.yml
-        dest: "{{ app_directory }}/docker-compose.yml"
+        dest: "/home/ubuntu/speedscore-frontend/docker-compose.yml"
         owner: ubuntu
         group: ubuntu
         mode: '0644'
