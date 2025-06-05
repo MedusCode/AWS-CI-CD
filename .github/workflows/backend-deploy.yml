@@ -36,6 +36,9 @@ jobs:
   test:
     name: Run backend tests
     runs-on: ubuntu-latest
+    env:
+      NODE_ENV: test
+      API_DEPLOYMENT_URL: http://localhost:4000
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -49,9 +52,6 @@ jobs:
         run: npm ci
 
       - name: Run auth tests
-        env:
-          NODE_ENV: test
-          API_DEPLOYMENT_URL: http://localhost:4000
         run: |
           npm test -- src/tests/authRoutes/registerUser.test.js
           npm test -- src/tests/authRoutes/loginLogout.test.js
