@@ -174,6 +174,6 @@ const service = new k8s.core.v1.Service("api-service", {
 }, { provider: k8sProvider });
 
 // Export values
-export const kubeconfig = cluster.kubeconfig;
+// export const kubeconfig = cluster.kubeconfig;
 export const apiServiceHostname = service.status.loadBalancer.ingress[0].hostname;
 
