@@ -9,7 +9,7 @@ on:
     branches:
       - backend-deploy
 
-env: &base-env
+env:
   PORT: 4000
   NODE_ENV: production
   API_DEPLOYMENT_URL: https://api.medus.click
@@ -36,11 +36,6 @@ jobs:
   test:
     name: Run backend tests
     runs-on: ubuntu-latest
-    env:
-      <<: *base-env
-      NODE_ENV: test
-      API_DEPLOYMENT_URL: http://localhost:4000
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -54,6 +49,9 @@ jobs:
         run: npm ci
 
       - name: Run auth tests
+        env:
+          NODE_ENV: test
+          API_DEPLOYMENT_URL: http://localhost:4000
         run: |
           npm test -- src/tests/authRoutes/registerUser.test.js
           npm test -- src/tests/authRoutes/loginLogout.test.js
@@ -62,8 +60,6 @@ jobs:
     name: Build and push Docker image
     runs-on: ubuntu-latest
     needs: test
-    env:
-      <<: *base-env
 
     steps:
       - name: Checkout code
@@ -82,8 +78,6 @@ jobs:
     name: Deploy backend to EKS
     runs-on: ubuntu-latest
     needs: build
-    env:
-      <<: *base-env
 
     steps:
       - name: Checkout code
