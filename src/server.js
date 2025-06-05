@@ -32,6 +32,8 @@ import setupSwagger from './swagger.js';
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 const connectStr = process.env.MONGODB_URI;
+const clientDeploymentUrl = process.env.CLIENT_DEPLOYMENT_URL;
+const port = process.env.PORT || 3000;
 const isProduction = process.env.NODE_ENV === 'production';
 
 const mongoClient = new MongoClient(connectStr);
@@ -85,7 +87,7 @@ app.use(session({
 
 // Enable CORS for all routes
 const corsOptions = {
-  origin: isProduction ? 'https://speedscore.webdevbook.com' : 'http://localhost:3000',
+  origin: isProduction ? clientDeploymentUrl : `http://localhost:${port}`,
   credentials: true // Allow cookies to be sent with requests
 };
 

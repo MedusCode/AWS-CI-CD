@@ -5,6 +5,16 @@ import * as k8s from "@pulumi/kubernetes";
 
 // Load config values
 const config = new pulumi.Config();
+
+const nodeEnv = config.require("nodeEnv");
+const port = config.require("port")
+const subDomain = config.require("subDomain");
+const domain = config.require("domain");
+const clientDeploymentUrl = config.require("clientDeploymentUrl");
+const accessTokenDuration = config.require("accessTokenDuration");
+const refreshTokenDuration = config.require("refreshTokenDuration");
+const sendgridFromAddress = config.require("sendgridFromAddress");
+
 const sessionSecret = config.requireSecret("sessionSecret");
 const jwtSecret = config.requireSecret("jwtSecret");
 const mongodbUri = config.requireSecret("mongodbUri");
@@ -78,14 +88,14 @@ const registrySecret = new k8s.core.v1.Secret("ghcr-secret", {
 
 // Deployment environment variables
 const apiEnvVars = [
-  { name: "NODE_ENV", value: "production" },
-  { name: "PORT", value: "4000" },
-  { name: "API_DEPLOYMENT_URL", value: "https://api.medus.click" },
-  { name: "CLIENT_DEPLOYMENT_URL", value: "http://speedscore.medus.click" },
-  { name: "ACCESS_TOKEN_DURATION", value: "1d" },
-  { name: "REFRESH_TOKEN_DURATION", value: "7d" },
-  { name: "SENDGRID_FROM_ADDRESS", value: "cs14394go@gmail.com" },
-  { name: "COOKIE_DOMAIN", value: "medus.click" },
+  { name: "NODE_ENV", value: nodeEnv },
+  { name: "PORT", value: port },
+  { name: "API_DEPLOYMENT_URL", value: `https://${subDomain}.${domain}` },
+  { name: "CLIENT_DEPLOYMENT_URL", value: clientDeploymentUrl },
+  { name: "ACCESS_TOKEN_DURATION", value: accessTokenDuration },
+  { name: "REFRESH_TOKEN_DURATION", value: refreshTokenDuration },
+  { name: "SENDGRID_FROM_ADDRESS", value: sendgridFromAddress },
+  { name: "COOKIE_DOMAIN", value: domain },
 
   { name: "JWT_SECRET", valueFrom: { secretKeyRef: { name: "api-secrets", key: "jwtSecret" } } },
   { name: "MONGODB_URI", valueFrom: { secretKeyRef: { name: "api-secrets", key: "mongodbUri" } } },
@@ -173,7 +183,21 @@ const service = new k8s.core.v1.Service("api-service", {
   },
 }, { provider: k8sProvider });
 
+const apiZone = aws.route53.getZone({
+  name: domain,
+  privateZone: false,
+});
+
+// Route53 DNS Record
+const apiCnameRecord = new aws.route53.Record("api-cname-record", {
+  name: `${subDomain}.${domain}`,
+  type: "CNAME",
+  ttl: 300,
+  zoneId: apiZone.then(z => z.zoneId),
+  records: [service.status.loadBalancer.ingress[0].hostname],
+});
+
 // Export values
-// export const kubeconfig = cluster.kubeconfig;
 export const apiServiceHostname = service.status.loadBalancer.ingress[0].hostname;
+export const apiCustomDomain = pulumi.interpolate`https://${apiCnameRecord.name}`;
 

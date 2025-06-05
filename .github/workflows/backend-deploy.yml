@@ -13,16 +13,17 @@ env:
   PORT: 4000
   NODE_ENV: production
   API_DEPLOYMENT_URL: https://api.medus.click
-  CLIENT_DEPLOYMENT_URL: http://speedscore.medus.click
+  CLIENT_DEPLOYMENT_URL: https://speedscore.medus.click
   COOKIE_DOMAIN: medus.click
+  SUB_DOMAIN: api
   ACCESS_TOKEN_DURATION: 1d
   REFRESH_TOKEN_DURATION: 7d
+  SENDGRID_FROM_ADDRESS: cs14394go@gmail.com
   MONGODB_URI: ${{ secrets.MONGODB_URI }}
   JWT_SECRET: ${{ secrets.JWT_SECRET }}
   SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
   MFA_ENCRYPTION_KEY: ${{ secrets.MFA_ENCRYPTION_KEY }}
   SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
-  SENDGRID_FROM_ADDRESS: ${{ secrets.SENDGRID_FROM_ADDRESS }}
   GH_CLIENT_ID: ${{ secrets.GH_CLIENT_ID }}
   GH_CLIENT_SECRET: ${{ secrets.GH_CLIENT_SECRET }}
   certificateArn: ${{ secrets.CERTIFICATE_ARN }}
@@ -98,6 +99,16 @@ jobs:
         run: |
           pulumi stack select dev
           pulumi config set aws:region us-west-2
+          
+          pulumi config set speedscore_backend:nodeEnv $NODE_ENV
+          pulumi config set speedscore_backend:port $PORT
+          pulumi config set speedscore_backend:subDomain $SUB_DOMAIN
+          pulumi config set speedscore_backend:domain $COOKIE_DOMAIN
+          pulumi config set speedscore_backend:clientDeploymentUrl $CLIENT_DEPLOYMENT_URL
+          pulumi config set speedscore_backend:accessTokenDuration $ACCESS_TOKEN_DURATION
+          pulumi config set speedscore_backend:refreshTokenDuration $REFRESH_TOKEN_DURATION
+          pulumi config set speedscore_backend:sendgridFromAddress $SENDGRID_FROM_ADDRESS
+          
           pulumi config set --secret speedscore_backend:githubUsername $github_username
           pulumi config set --secret speedscore_backend:jwtSecret "$JWT_SECRET"
           pulumi config set --secret speedscore_backend:mongodbUri "$MONGODB_URI"
