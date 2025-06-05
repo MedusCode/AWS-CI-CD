@@ -97,18 +97,13 @@ jobs:
           echo "$aws_ssh" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
 
-      - name: Debug deploy outputs
-        run: |
-          echo "Instance IP: ${{ needs.deploy.outputs.instance_ip }}"
-          echo "Ansible User: ${{ needs.deploy.outputs.ansible_user }}"
-
       - name: Write inventory file
         run: |
-          echo "[all]" > .ansible_inventory
-          echo "${{ needs.deploy.outputs.instance_ip }} ansible_user=${{ needs.deploy.outputs.ansible_user }} ansible_ssh_private_key_file=~/.ssh/id_rsa" >> .ansible_inventory
+          echo "[all]" > inventory.ini
+          echo "${{ needs.deploy.outputs.instance_ip }} ansible_user=${{ needs.deploy.outputs.ansible_user }} ansible_ssh_private_key_file=~/.ssh/id_rsa" >> inventory.ini
 
       - name: Run Ansible Playbook
         uses: dawidd6/action-ansible-playbook@v2
         with:
           playbook: ansible/frontend-deploy.yml
-          options: -i .ansible_inventory
+          options: -i inventory.ini

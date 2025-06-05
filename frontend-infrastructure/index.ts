@@ -96,3 +96,5 @@ new aws.lb.Listener("http-redirect-listener", {
 });
 
 export const frontendUrl = alb.dnsName;
+export const instancePublicIp = instance.publicIp;
+export const ansibleUser = "ubuntu";
