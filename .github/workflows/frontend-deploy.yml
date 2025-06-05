@@ -97,6 +97,11 @@ jobs:
           echo "$aws_ssh" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
 
+      - name: Debug deploy outputs
+        run: |
+          echo "Instance IP: ${{ needs.deploy.outputs.instance_ip }}"
+          echo "Ansible User: ${{ needs.deploy.outputs.ansible_user }}"
+
       - name: Write inventory file
         run: |
           echo "[all]" > .ansible_inventory
