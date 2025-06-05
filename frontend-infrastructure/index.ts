@@ -3,6 +3,8 @@ import * as aws from "@pulumi/aws";
 
 // Load config values
 const config = new pulumi.Config();
+const domain = config.require("domain");
+const subDomain = config.require("subDomain");
 const certificateArn = config.require("certificateArn");
 const sshKeyName = config.require("sshKeyName");
 
@@ -96,6 +98,24 @@ new aws.lb.Listener("http-redirect-listener", {
   }],
 });
 
+const zone = aws.route53.getZone({
+  name: domain,
+  privateZone: false,
+});
+
+// Create Route53 DNS record
+const dnsRecord = new aws.route53.Record("frontend-alias-record", {
+  name: `${subDomain}.${domain}`,
+  type: "A",
+  zoneId: zone.then(z => z.zoneId),
+  aliases: [{
+    name: alb.dnsName,
+    zoneId: alb.zoneId,
+    evaluateTargetHealth: true,
+  }],
+});
+
 export const frontendUrl = alb.dnsName;
+export const dnsRecordName = dnsRecord.name;
 export const instancePublicIp = instance.publicIp;
 export const ansibleUser = "ubuntu";

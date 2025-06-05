@@ -13,6 +13,8 @@ env:
   github_username: meduscode
   aws_ssh_name: aws_cs561
   aws_region: us-west-2
+  domain: medus.click
+  sub_domain: speedscore
   github_token: ${{ secrets.TOKEN }}
   aws_ssh: ${{ secrets.AWS_CS561_SSH }}
   github_actions_role_arn: ${{ secrets.GH_ACTIONS_ROLE_ARN }}
@@ -65,6 +67,8 @@ jobs:
         run: |
           pulumi stack select dev
           pulumi config set aws:region "$aws_region"
+          pulumi config set domain "$domain"
+          pulumi config set subDomain "$sub_domain"
           pulumi config set sshKeyName "$aws_ssh_name"
           pulumi config set --secret certificateArn "$certificateArn"
 
