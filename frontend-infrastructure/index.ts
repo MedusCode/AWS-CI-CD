@@ -19,6 +19,7 @@ const subnetIds = pulumi
 const secGroup = new aws.ec2.SecurityGroup("web-sec-group", {
   description: "Allow HTTP and HTTPS",
   ingress: [
+    { protocol: "tcp", fromPort: 22, toPort: 22, cidrBlocks: ["0.0.0.0/0"] },
     { protocol: "tcp", fromPort: 80, toPort: 80, cidrBlocks: ["0.0.0.0/0"] },
     { protocol: "tcp", fromPort: 443, toPort: 443, cidrBlocks: ["0.0.0.0/0"] },
   ],
