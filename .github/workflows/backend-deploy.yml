@@ -56,6 +56,26 @@ jobs:
       - name: Log in to GHCR
         run: echo "${{ secrets.TOKEN }}" | docker login ghcr.io -u meduscode --password-stdin
 
+      - name: Create .env file
+        run: |
+          cat <<EOF > .env
+          PORT=4000
+          NODE_ENV=production
+          API_DEPLOYMENT_URL=${API_DEPLOYMENT_URL}
+          CLIENT_DEPLOYMENT_URL=${CLIENT_DEPLOYMENT_URL}
+          COOKIE_DOMAIN=${COOKIE_DOMAIN}
+          ACCESS_TOKEN_DURATION=${ACCESS_TOKEN_DURATION}
+          REFRESH_TOKEN_DURATION=${REFRESH_TOKEN_DURATION}
+          MONGODB_URI=${MONGODB_URI}
+          JWT_SECRET=${JWT_SECRET}
+          SESSION_SECRET=${SESSION_SECRET}
+          MFA_ENCRYPTION_KEY=${MFA_ENCRYPTION_KEY}
+          SENDGRID_API_KEY=${SENDGRID_API_KEY}
+          SENDGRID_FROM_ADDRESS=${SENDGRID_FROM_ADDRESS}
+          GH_CLIENT_ID=${CLIENT_ID}
+          GH_CLIENT_SECRET=${CLIENT_SECRET}
+          EOF
+
       - name: Build and push Docker image
         run: |
           docker build -t ghcr.io/meduscode/speedscore-api:latest .
