@@ -1,3 +1,0 @@
-config:
-  aws:region: us-west-2
-  frontend-infrastructure:sshKeyName: aws_cs561

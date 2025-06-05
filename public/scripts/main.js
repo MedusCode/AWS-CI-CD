@@ -9,7 +9,7 @@
 /************************************/
 //The URL of the API server. It should be changed to the production URL upon deployment.
 //const GlobalApiUrl = 'http://localhost:4000';
-const GlobalApiUrl = 'https://api.webdevbook.com'; 
+const GlobalApiUrl = 'https://api.medus.click';
 let GlobalHistoryLogging = true;
 let GlobalDialogClose = null; //points to the close button of the active dialog
 
@@ -22,7 +22,7 @@ let GlobalUserData = {}; //set upon login
 /************************************/
 /* MENU VARIABLES                   */
 /************************************/
-const GlobalMenuBtn =  document.getElementById("menuBtn"); 
+const GlobalMenuBtn =  document.getElementById("menuBtn");
 const GlobalMenu = document.getElementById("sideMenu");
 const GlobalMenuIcon = document.getElementById("menuBtnIcon");
 const GlobalMenuItems = document.querySelectorAll("li[role='menuitem']");
@@ -63,10 +63,10 @@ const GlobalFocusedMode = (() => {
 })()
 
 //Array of mode tab button elements:
-const GlobalModeTabButtons = 
+const GlobalModeTabButtons =
   document.querySelectorAll("button[role='tab']");
 //Array of mode tab panel elements:
-const GlobalModeTabPanels = 
+const GlobalModeTabPanels =
   document.querySelectorAll("div[role='tabpanel']");
 //Array mapping current mode to its name, so that
 //we can set document.title appropriately
@@ -76,7 +76,7 @@ GlobalModeNames=["ACTIVITY_FEED", "ROUNDS","COURSES","BUDDIES"];
 /* FLOATING ACTION BUTTON AND MODAL DIALOG VARIABLES */
 /*****************************************************/
 //Array of mode action buttons
-const GlobalModeActionButtons = 
+const GlobalModeActionButtons =
   document.querySelectorAll("button.float-btn");
 //array of mode action dialog boxes
 const GlobalModeActionDialogs =
@@ -241,7 +241,7 @@ const GlobalFirstFocusableLogRoundItem = (() => {
   return Object.freeze(Store)
 })()
 
-GlobalRoundDate.valueAsNumber = 
+GlobalRoundDate.valueAsNumber =
 Date.now()-(new Date()).getTimezoneOffset()*60000;
 
 /*****************************************************/
@@ -268,14 +268,14 @@ const GlobalDialogPaths = ["activityfeed/newpost","rounds/newround","courses/add
 
 /*************************************************************************
  * @function transitionToDialog
- * @desc 
+ * @desc
  * This function prepares the UI prior to opening a dialog box. It hides
  * the skip link, banner bar buttons, mode tabs, and current tab panel,
  * so that they are unavailable while the user interacts with the dialog.
  * It then displays the dialog box and dialog box title.
- * Note: This function is placed in main.js because it is useful to 
+ * Note: This function is placed in main.js because it is useful to
  * multiple UI components.
- * @param dialogTitle: The title of the dialog to which to set 
+ * @param dialogTitle: The title of the dialog to which to set
  * document.title
  * @param dialog: A reference to the HTML element containing the dialog;
  * it will be shown by removing the "hidden" class. If dialog is null,
@@ -283,16 +283,16 @@ const GlobalDialogPaths = ["activityfeed/newpost","rounds/newround","courses/add
  * that is taken care of elsewhere.
  * @param stateObj: The state object to push onto the history stack.
  * @param closeBtn: A reference to the close button of the dialog.
- * @param dialogPrepFunc: A reference to a function to call to prepare 
+ * @param dialogPrepFunc: A reference to a function to call to prepare
  * the dialog's appearance.
  * @global GlobalSkipLink: The skip link
  * @global GlobalMenuBtn: The menu button
  * @global GlobalModeTabsContainer: The mode tabs
- * @global GlobalModeTabPanels: array of tab panels 
+ * @global GlobalModeTabPanels: array of tab panels
  * @global GlobalCurrentMode, index of current mode.
  *************************************************************************/
  function transitionToDialog(dialog, dialogTitle, stateObj, closeBtn, dialogPrepFunc) {
-  GlobalSkipLink.classList.add("hidden"); 
+  GlobalSkipLink.classList.add("hidden");
   GlobalMenuBtn.classList.add("hidden");
   GlobalSearchBtn.classList.add("hidden");
   GlobalProfileBtn.classList.add("hidden");
@@ -307,7 +307,7 @@ const GlobalDialogPaths = ["activityfeed/newpost","rounds/newround","courses/add
     history.pushState(stateObj, "", stateObj.path);
     GlobalDialogClose = closeBtn;
   }
-  dialogPrepFunc();   
+  dialogPrepFunc();
 }
 
 /*************************************************************************
@@ -315,19 +315,19 @@ const GlobalDialogPaths = ["activityfeed/newpost","rounds/newround","courses/add
  * @param dialogToClose -- a reference to the HML dialog element to close.
  * If null, we do not hide the dialog element, as we assume that will be
  * taken care of elsewhere.
- * @desc 
+ * @desc
  * This function restores the UI after closing a dialog box. It shows
  * the skip link, banner bar buttons, mode tabs, and current tab panel,
- * Note: This function is placed in main.js because it is useful to 
+ * Note: This function is placed in main.js because it is useful to
  * multiple UI components.
  * @global GlobalSkipLink: The skip link
  * @global GlobalMenuBtn: The menu button
  * @global GlobalModeTabsContainer: The mode tabs
- * @global GlobalModeTabPanels: array of tab panels 
+ * @global GlobalModeTabPanels: array of tab panels
  * @global GlobalCurrentMode, index of current mode.
  *************************************************************************/
  function transitionFromDialog(dialogToClose) {
-  GlobalSkipLink.classList.remove("hidden"); 
+  GlobalSkipLink.classList.remove("hidden");
   GlobalMenuBtn.classList.remove("hidden");
   GlobalSearchBtn.classList.remove("hidden");
   GlobalProfileBtn.classList.remove("hidden");
