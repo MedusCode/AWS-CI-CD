@@ -106,3 +106,4 @@ jobs:
         uses: dawidd6/action-ansible-playbook@v2
         with:
           playbook: ansible/frontend-deploy.yml
+          options: -i .ansible_inventory
