@@ -4,8 +4,9 @@
   become: true
 
   vars:
-    app_directory: /home/ubuntu/speedscore-frontend
-    domain_name: speedscore.medus.click
+    app_directory: "{{ lookup('env', 'APP_DIRECTORY') }}"
+    github_username: "{{ lookup('env', 'GITHUB_USERNAME') }}"
+    github_token: "{{ lookup('env', 'GITHUB_TOKEN') }}"
 
   tasks:
     - name: Install dependencies
@@ -45,28 +46,6 @@
         group: ubuntu
         mode: '0644'
 
-    - name: Create SSL directory
-      file:
-        path: /etc/nginx/ssl
-        state: directory
-        mode: '0755'
-
-    - name: Copy SSL certificate
-      copy:
-        src: ssl/cert.pem
-        dest: /etc/nginx/ssl/cert.pem
-        owner: root
-        group: root
-        mode: '0644'
-
-    - name: Copy SSL private key
-      copy:
-        src: ssl/key.pem
-        dest: /etc/nginx/ssl/key.pem
-        owner: root
-        group: root
-        mode: '0600'
-
     - name: Login to GitHub Container Registry
       docker_login:
         registry_url: ghcr.io
@@ -85,9 +64,5 @@
         restart_policy: always
         ports:
           - "80:80"
-          - "443:443"
         state: started
         recreate: true
-        volumes:
-          - /etc/nginx/ssl/cert.pem:/etc/nginx/ssl/cert.pem:ro
-          - /etc/nginx/ssl/key.pem:/etc/nginx/ssl/key.pem:ro

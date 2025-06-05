@@ -1,66 +1,98 @@
-import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
+import * as aws from "@pulumi/aws";
 
-// Конфигурация: SSH ключ из `pulumi config`
+// Load config values
 const config = new pulumi.Config();
+const certificateArn = config.require("certificateArn");
 const sshKeyName = config.require("sshKeyName");
 
-// Получаем последний доступный Ubuntu AMI (работает в любом регионе)
-const ami = aws.ec2.getAmi({
-  mostRecent: true,
-  owners: ["099720109477"], // Canonical (официальные Ubuntu образы)
-  filters: [
-    {
-      name: "name",
-      values: ["ubuntu/images/hvm-ssd/ubuntu-*-amd64-server-*"], // Универсально
-    },
-  ],
-});
+// Lookup default VPC and subnets
+const vpc = aws.ec2.getVpc({ default: true });
+const subnetIds = pulumi
+  .output(vpc)
+  .apply(v =>
+    aws.ec2.getSubnets({ filters: [{ name: "vpc-id", values: [v.id] }] })
+  )
+  .apply(subnets => subnets.ids);
 
-// Security Group для SSH, HTTP, HTTPS
-const securityGroup = new aws.ec2.SecurityGroup("frontend-sg", {
-  description: "Allow SSH, HTTP, and HTTPS access",
+// Create security group to allow web traffic
+const secGroup = new aws.ec2.SecurityGroup("web-sec-group", {
+  description: "Allow HTTP and HTTPS",
   ingress: [
-    {
-      protocol: "tcp",
-      fromPort: 22,
-      toPort: 22,
-      cidrBlocks: ["0.0.0.0/0"],
-    },
-    {
-      protocol: "tcp",
-      fromPort: 80,
-      toPort: 80,
-      cidrBlocks: ["0.0.0.0/0"],
-    },
-    {
-      protocol: "tcp",
-      fromPort: 443,
-      toPort: 443,
-      cidrBlocks: ["0.0.0.0/0"],
-    },
+    { protocol: "tcp", fromPort: 80, toPort: 80, cidrBlocks: ["0.0.0.0/0"] },
+    { protocol: "tcp", fromPort: 443, toPort: 443, cidrBlocks: ["0.0.0.0/0"] },
   ],
   egress: [
-    {
-      protocol: "-1",
-      fromPort: 0,
-      toPort: 0,
-      cidrBlocks: ["0.0.0.0/0"],
-    },
+    { protocol: "-1", fromPort: 0, toPort: 0, cidrBlocks: ["0.0.0.0/0"] },
   ],
 });
 
-// EC2 инстанс
-const instance = new aws.ec2.Instance("frontend-instance", {
-  ami: ami.then(a => a.id),
-  instanceType: "t2.micro",
-  keyName: sshKeyName,
-  vpcSecurityGroupIds: [securityGroup.id],
-  tags: {
-    Name: "SpeedScore Frontend",
-  },
+// Fetch Ubuntu AMI
+const ami = aws.ec2.getAmi({
+  mostRecent: true,
+  owners: ["099720109477"],
+  filters: [
+    { name: "name", values: ["ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"] },
+  ],
 });
 
-// Экспортируем публичный IP и DNS
-export const publicIp = instance.publicIp;
-export const publicDns = instance.publicDns;
+// Launch EC2 instance
+const instance = new aws.ec2.Instance("frontend-instance", {
+  instanceType: "t2.micro",
+  ami: pulumi.output(ami).id,
+  subnetId: subnetIds.apply(ids => ids[0]),
+  vpcSecurityGroupIds: [secGroup.id],
+  associatePublicIpAddress: true,
+  keyName: sshKeyName,
+  tags: { Name: "frontend-server" },
+});
+
+// Create Target Group for the instance
+const targetGroup = new aws.lb.TargetGroup("frontend-tg", {
+  port: 80,
+  protocol: "HTTP",
+  targetType: "instance",
+  vpcId: pulumi.output(vpc).id,
+});
+
+// Register instance to Target Group
+new aws.lb.TargetGroupAttachment("frontend-tg-attachment", {
+  targetGroupArn: targetGroup.arn,
+  targetId: instance.id,
+  port: 80,
+});
+
+// Create Application Load Balancer (ALB)
+const alb = new aws.lb.LoadBalancer("frontend-lb", {
+  internal: false,
+  loadBalancerType: "application",
+  securityGroups: [secGroup.id],
+  subnets: subnetIds,
+});
+
+// Create HTTPS listener
+new aws.lb.Listener("https-listener", {
+  loadBalancerArn: alb.arn,
+  port: 443,
+  protocol: "HTTPS",
+  sslPolicy: "ELBSecurityPolicy-2016-08",
+  certificateArn: certificateArn,
+  defaultActions: [{ type: "forward", targetGroupArn: targetGroup.arn }],
+});
+
+// Redirect HTTP to HTTPS
+new aws.lb.Listener("http-redirect-listener", {
+  loadBalancerArn: alb.arn,
+  port: 80,
+  protocol: "HTTP",
+  defaultActions: [{
+    type: "redirect",
+    redirect: {
+      port: "443",
+      protocol: "HTTPS",
+      statusCode: "HTTP_301",
+    },
+  }],
+});
+
+export const frontendUrl = alb.dnsName;

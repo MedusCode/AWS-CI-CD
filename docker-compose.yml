@@ -1,20 +1,8 @@
-version: '3.8'
+version: '3'
 
 services:
   app:
     image: ghcr.io/meduscode/speedscore-frontend:latest
     restart: always
-    expose:
-      - "80"
-
-  nginx:
-    image: nginx:alpine
-    restart: always
     ports:
       - "80:80"
-      - "443:443"
-    volumes:
-      - ./ssl/cert.pem:/etc/nginx/ssl/cert.pem:ro
-      - ./ssl/key.pem:/etc/nginx/ssl/key.pem:ro
-    depends_on:
-      - app
