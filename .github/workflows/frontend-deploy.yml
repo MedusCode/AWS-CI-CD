@@ -106,4 +106,7 @@ jobs:
         uses: dawidd6/action-ansible-playbook@v2
         with:
           playbook: ansible/frontend-deploy.yml
-          options: -i inventory.ini
+          options: >-
+            -i inventory.ini
+            --extra-vars "github_username=${{ env.github_username }} github_token=${{ env.github_token }}"
+          

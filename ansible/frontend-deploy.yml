@@ -3,10 +3,6 @@
   hosts: all
   become: true
 
-  vars:
-    github_username: "{{ lookup('env', 'GITHUB_USERNAME') }}"
-    github_token: "{{ lookup('env', 'GITHUB_TOKEN') }}"
-
   tasks:
     - name: Install dependencies
       apt:
