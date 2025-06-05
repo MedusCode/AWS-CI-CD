@@ -3,7 +3,7 @@ import * as aws from "@pulumi/aws";
 import * as eks from "@pulumi/eks";
 import * as k8s from "@pulumi/kubernetes";
 
-// Load config
+// Load config values
 const config = new pulumi.Config();
 const certificateArn = config.requireSecret("certificateArn");
 const jwtSecret = config.requireSecret("jwtSecret");
@@ -12,12 +12,12 @@ const githubUsername = config.require("github_username");
 const githubToken = config.requireSecret("github_token");
 const githubActionsRoleArn = config.require("github_actions_role_arn");
 
-// AWS Provider (region us-west-2)
+// AWS provider (region us-west-2)
 const awsProvider = new aws.Provider("aws-provider", {
-  region: "us-west-2"
+  region: "us-west-2",
 });
 
-// EKS Cluster
+// EKS cluster
 const cluster = new eks.Cluster("speedscore-cluster", {
   version: "1.29",
   instanceType: "t3.medium",
@@ -33,114 +33,111 @@ const cluster = new eks.Cluster("speedscore-cluster", {
   ],
 }, { provider: awsProvider });
 
-
-
-// K8s Provider
-const k8sProvider = new k8s.Provider("k8s-provider", {
+// Kubernetes provider
+const k8sProvider = new k8s.Provider("k8sProvider", {
   kubeconfig: cluster.kubeconfig,
   enableServerSideApply: true,
 }, { dependsOn: [cluster] });
 
 // Namespace
-const namespace = new k8s.core.v1.Namespace("speedscore", {
+const namespace = new k8s.core.v1.Namespace("speedscore-namespace", {
   metadata: { name: "speedscore" },
 }, { provider: k8sProvider });
 
-// Secrets
-const secret = new k8s.core.v1.Secret("api-secrets", {
+// Secret for GHCR (GitHub Container Registry)
+const dockerConfig = pulumi.secret({
+  auths: {
+    "ghcr.io": {
+      username: githubUsername,
+      password: githubToken,
+      email: "dev@example.com", // dummy email
+      auth: Buffer.from(`${githubUsername}:${githubToken}`).toString("base64"),
+    },
+  },
+});
+const registrySecret = new k8s.core.v1.Secret("ghcr-secret", {
   metadata: {
-    namespace: "speedscore",
+    name: "ghcr-secret",
+    namespace: namespace.metadata.name,
+  },
+  type: "kubernetes.io/dockerconfigjson",
+  stringData: {
+    ".dockerconfigjson": dockerConfig.apply(JSON.stringify),
+  },
+}, { provider: k8sProvider });
+
+// Deployment environment variables
+const apiEnvVars = [
+  { name: "NODE_ENV", value: "production" },
+  { name: "PORT", value: "4000" },
+  { name: "JWT_SECRET", valueFrom: { secretKeyRef: { name: "api-secrets", key: "jwtSecret" } } },
+  { name: "MONGODB_URI", valueFrom: { secretKeyRef: { name: "api-secrets", key: "mongodbUri" } } },
+  { name: "API_DEPLOYMENT_URL", value: `https://api.medus.click` },
+];
+
+// Secrets
+const apiSecrets = new k8s.core.v1.Secret("api-secrets", {
+  metadata: {
+    name: "api-secrets",
+    namespace: namespace.metadata.name,
   },
   stringData: {
-    JWT_SECRET: jwtSecret,
-    MONGODB_URI: mongodbUri,
+    jwtSecret: jwtSecret,
+    mongodbUri: mongodbUri,
+  },
+}, { provider: k8sProvider });
+
+// Deployment
+const apiDeployment = new k8s.apps.v1.Deployment("api-deployment", {
+  metadata: {
+    namespace: namespace.metadata.name,
+    name: "api",
+  },
+  spec: {
+    replicas: 2,
+    selector: {
+      matchLabels: { app: "api" },
+    },
+    template: {
+      metadata: { labels: { app: "api" } },
+      spec: {
+        containers: [
+          {
+            name: "api",
+            image: `ghcr.io/${githubUsername}/speedscore-api:latest`,
+            ports: [{ containerPort: 4000 }],
+            env: apiEnvVars,
+          },
+        ],
+        imagePullSecrets: [{ name: "ghcr-secret" }],
+      },
+    },
   },
 }, { provider: k8sProvider });
 
 // Service
 const service = new k8s.core.v1.Service("api-service", {
   metadata: {
-    namespace: "speedscore",
     name: "api-service",
+    namespace: namespace.metadata.name,
     annotations: {
       "service.beta.kubernetes.io/aws-load-balancer-type": "nlb",
-      "service.beta.kubernetes.io/aws-load-balancer-ssl-cert": certificateArn,
       "service.beta.kubernetes.io/aws-load-balancer-backend-protocol": "http",
-      "service.beta.kubernetes.io/aws-load-balancer-ssl-ports": "443",
+      "service.beta.kubernetes.io/aws-load-balancer-ssl-cert": certificateArn,
+      "service.beta.kubernetes.io/aws-load-balancer-ssl-ports": "https",
     },
   },
   spec: {
     type: "LoadBalancer",
+    selector: { app: "api" },
     ports: [
-      { port: 80, targetPort: 4000, name: "http" },
-      { port: 443, targetPort: 4000, name: "https" },
+      { name: "http", port: 80, targetPort: 4000 },
+      { name: "https", port: 443, targetPort: 4000 },
     ],
-    selector: { app: "speedscore-api" },
   },
-}, { provider: k8sProvider, dependsOn: [namespace] });
-
-// Docker Registry Secret for GHCR
-const dockerSecret = new k8s.core.v1.Secret("ghcr-secret", {
-  metadata: {
-    namespace: "speedscore",
-    name: "ghcr-secret"
-  },
-  type: "kubernetes.io/dockerconfigjson",
-  stringData: {
-    ".dockerconfigjson": pulumi.interpolate`{
-      "auths": {
-        "https://ghcr.io": {
-          "username": "${githubUsername}",
-          "password": "${githubToken}",
-          "email": "example@example.com",
-          "auth": "${Buffer.from(`${githubUsername}:${githubToken}`).toString("base64")}"
-        }
-      }
-    }`
-  }
 }, { provider: k8sProvider });
 
-// Deployment
-const deployment = new k8s.apps.v1.Deployment("api-deployment", {
-  metadata: {
-    namespace: "speedscore",
-    name: "api-deployment"
-  },
-  spec: {
-    replicas: 2,
-    selector: {
-      matchLabels: {
-        app: "speedscore-api"
-      }
-    },
-    template: {
-      metadata: {
-        labels: {
-          app: "speedscore-api"
-        }
-      },
-      spec: {
-        containers: [
-          {
-            name: "speedscore-api",
-            image: `ghcr.io/${githubUsername}/speedscore-api:latest`,
-            ports: [{ containerPort: 4000 }],
-            envFrom: [
-              {
-                secretRef: {
-                  name: "api-secrets"
-                }
-              }
-            ],
-          }
-        ],
-        imagePullSecrets: [{ name: "ghcr-secret" }]
-      }
-    }
-  }
-}, { provider: k8sProvider, dependsOn: [namespace, dockerSecret, secret] });
-
-// Output LoadBalancer URL
-export const loadBalancerUrl = service.status.loadBalancer.ingress[0].hostname;
+// Export values
 export const kubeconfig = cluster.kubeconfig;
-export const clusterName = cluster.eksCluster.name;
+export const apiServiceHostname = service.status.loadBalancer.ingress[0].hostname;
+

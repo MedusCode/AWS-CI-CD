@@ -53,13 +53,13 @@ jobs:
 #          npm test -- src/tests/authRoutes/registerUser.test.js
 #          npm test -- src/tests/authRoutes/loginLogout.test.js
 #
-#      - name: Log in to GHCR
-#        run: echo "${{ secrets.TOKEN }}" | docker login ghcr.io -u meduscode --password-stdin
-#
-#      - name: Build and push Docker image
-#        run: |
-#          docker build -t ghcr.io/meduscode/speedscore-api:latest .
-#          docker push ghcr.io/meduscode/speedscore-api:latest
+      - name: Log in to GHCR
+        run: echo "${{ secrets.TOKEN }}" | docker login ghcr.io -u meduscode --password-stdin
+
+      - name: Build and push Docker image
+        run: |
+          docker build -t ghcr.io/meduscode/speedscore-api:latest .
+          docker push ghcr.io/meduscode/speedscore-api:latest
 
       - name: Install Pulumi dependencies
         working-directory: ./backend-infrastructure
