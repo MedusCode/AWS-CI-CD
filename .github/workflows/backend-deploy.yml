@@ -76,6 +76,9 @@ jobs:
           GH_CLIENT_SECRET=${CLIENT_SECRET}
           EOF
 
+      - name: Check that .env exists
+        run: ls -la .env
+
       - name: Build and push Docker image
         run: |
           docker build -t ghcr.io/meduscode/speedscore-api:latest .
