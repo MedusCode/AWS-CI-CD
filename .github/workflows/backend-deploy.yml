@@ -137,3 +137,5 @@ jobs:
           work-dir: ./backend-infrastructure
           command: up
           stack-name: MedusCode-org/speedscore_backend/dev
+        env:
+          PULUMI_SUPPRESS_OUTPUTS: "true"
