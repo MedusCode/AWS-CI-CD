@@ -104,7 +104,7 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
 
       - name: lol
-        run: echo "${{ needs.infrastructure.outputs.instance_ip }} ansible_user=${{ needs.infrastructure.outputs.ansible_user }}
+        run: echo "${{ needs.infrastructure.outputs.instance_ip }} ansible_user=${{ needs.infrastructure.outputs.ansible_user }}"
 
       - name: Write inventory file
         run: |
