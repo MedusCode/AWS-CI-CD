@@ -85,7 +85,7 @@ jobs:
         run: docker push ghcr.io/$github_username/speedscore-frontend:latest
 
   infrastructure:
-    name: Deploy frontend infrastructure with Pulumi
+    name: Configure infrastructure with Pulumi
     runs-on: ubuntu-latest
     needs: build
 
@@ -134,7 +134,7 @@ jobs:
           echo "user=$(pulumi stack output ansibleUser)" >> $GITHUB_OUTPUT
 
   deploy:
-    name: Configure frontend with Ansible
+    name: Deploy app with Ansible
     runs-on: ubuntu-latest
     needs: infrastructure
 
