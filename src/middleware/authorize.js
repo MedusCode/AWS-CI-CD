@@ -13,16 +13,16 @@ import { UnauthorizedError } from '../utils/errors.js';
 const accessRules = {
   'admin': {
     'users': {
-      'POST': () => true, 
-      'PUT': () => true, 
-      'DELETE': () => true, 
-      'GET': () => true 
+      'POST': () => true,
+      'PUT': () => true,
+      'DELETE': () => true,
+      'GET': () => true
     },
     'courses': {
-      'POST': () => true, 
-      'PUT': () => true, 
-      'DELETE': () => true, 
-      'GET': () => true 
+      'POST': () => true,
+      'PUT': () => true,
+      'DELETE': () => true,
+      'GET': () => true
     },
     'auth': {
       'POST': (resourceId, userId) => {
@@ -42,7 +42,7 @@ const accessRules = {
   'user': {
     'users': {
       'POST': (resourceId, userId) => {
-        return (resourceId === userId); 
+        return (resourceId === userId);
       },
       'PUT': (resourceId, userId) => {
         return (resourceId === userId);
@@ -56,6 +56,20 @@ const accessRules = {
         } else { //Get another user's info
           return false;
         }
+      }
+    },
+    'courses': {
+      'POST': (resourceId, userId) => {
+        return (resourceId === userId);
+      },
+      'PUT': (resourceId, userId) => {
+        return (resourceId === userId);
+      },
+      'DELETE': (resourceId, userId) => {
+        return (resourceId === userId);
+      },
+      'GET':  (resourceId, userId) => {
+        return (resourceId === userId);
       }
     },
     'auth': {
@@ -87,7 +101,7 @@ export const authorize = (req, res, next) => {
   const role = req.session.userRole;
   const resource = req.path.split('/')[1];
   const resourceId = req.params.userId;
-  const action = req.method; 
+  const action = req.method;
   if (accessRules[role] && accessRules[role][resource] && accessRules[role][resource][action]) {
     const rule = accessRules[role][resource][action];
     const hasPermission = rule(resourceId, userId);
