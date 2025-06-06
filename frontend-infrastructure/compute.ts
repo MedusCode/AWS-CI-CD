@@ -22,3 +22,5 @@ export const instance = new aws.ec2.Instance("frontend-instance", {
   keyName: sshKeyName,
   tags: { Name: "frontend-server" },
 });
+
+export const instancePublicIp = instance.publicIp;
