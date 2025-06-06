@@ -36,6 +36,14 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
 
+      - name: Start local server
+        run: npm start
+        env:
+          PORT: 5500
+
+      - name: Wait for server to be ready
+        run: npx wait-on http://localhost:5500
+
       - name: Run login keyboard tests
         run: npx playwright test ./tests/loginKeyboardTests.spec.js
 
