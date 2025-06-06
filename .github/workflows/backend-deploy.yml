@@ -119,7 +119,7 @@ jobs:
           pulumi config set speedscore_backend:port $PORT
           pulumi config set speedscore_backend:cookieDomain $COOKIE_DOMAIN
           pulumi config set speedscore_backend:clientDeploymentUrl $CLIENT_DEPLOYMENT_URL
-          pulumi config set --secret speedscore_backend:apiDeploymentUrl $API_DEPLOYMENT_URL
+          pulumi config set speedscore_backend:apiDeploymentUrl $API_DEPLOYMENT_URL
           pulumi config set speedscore_backend:accessTokenDuration $ACCESS_TOKEN_DURATION
           pulumi config set speedscore_backend:refreshTokenDuration $REFRESH_TOKEN_DURATION
           pulumi config set speedscore_backend:sendgridFromAddress $SENDGRID_FROM_ADDRESS
