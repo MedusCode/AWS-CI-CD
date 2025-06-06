@@ -143,6 +143,7 @@ const apiDeployment = new k8s.apps.v1.Deployment("api-deployment", {
             image: pulumi.interpolate`ghcr.io/${githubUsername}/speedscore-api:latest`,
             ports: [{ containerPort: 4000 }],
             env: apiEnvVars,
+            imagePullPolicy: "Always",
           },
         ],
         imagePullSecrets: [{ name: "ghcr-secret" }],

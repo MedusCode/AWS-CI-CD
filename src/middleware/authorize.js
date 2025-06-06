@@ -58,20 +58,6 @@ const accessRules = {
         }
       }
     },
-    'courses': {
-      'POST': (resourceId, userId) => {
-        return (resourceId === userId);
-      },
-      'PUT': (resourceId, userId) => {
-        return (resourceId === userId);
-      },
-      'DELETE': (resourceId, userId) => {
-        return (resourceId === userId);
-      },
-      'GET':  (resourceId, userId) => {
-        return (resourceId === userId);
-      }
-    },
     'auth': {
       'POST': (resourceId, userId) => {
         return (resourceId === userId);
@@ -109,5 +95,5 @@ export const authorize = (req, res, next) => {
       return next();
     }
   }
-  return next(new UnauthorizedError(`${userId} || ${role} || ${resource} || ${resourceId} || ${action}`));
+  return next(new UnauthorizedError("User is not authorized to perform this action"));
 }
