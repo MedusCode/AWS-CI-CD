@@ -3,13 +3,13 @@ import { alb } from "./alb";
 import { domain, subDomain } from "./config";
 
 // Get the Route53 zone
-export const zone = aws.route53.getZone({
+const zone = aws.route53.getZone({
   name: domain,
   privateZone: false,
 });
 
 // Create a DNS record pointing to the ALB
-export const dnsRecord = new aws.route53.Record("frontend-alias-record", {
+const dnsRecord = new aws.route53.Record("frontend-alias-record", {
   name: `${subDomain}.${domain}`,
   type: "A",
   zoneId: zone.then(z => z.zoneId),

@@ -1,6 +1,6 @@
 import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
-import { secGroup, subnetIds, vpc } from "./network";
+import { secGroup, subnetIds } from "./network";
 import { sshKeyName } from "./config";
 
 // Fetch Ubuntu AMI
@@ -13,7 +13,7 @@ const ami = aws.ec2.getAmi({
 });
 
 // Launch EC2 instance
-export const instance = new aws.ec2.Instance("frontend-instance", {
+const instance = new aws.ec2.Instance("frontend-instance", {
   instanceType: "t2.micro",
   ami: pulumi.output(ami).id,
   subnetId: subnetIds.apply(ids => ids[0]),
@@ -24,3 +24,4 @@ export const instance = new aws.ec2.Instance("frontend-instance", {
 });
 
 export const instancePublicIp = instance.publicIp;
+export const instanceId = instance.id;

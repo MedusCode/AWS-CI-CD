@@ -78,6 +78,8 @@ jobs:
           work-dir: ./frontend-infrastructure
           command: up
           stack-name: MedusCode-org/frontend-infrastructure/dev
+        env:
+          PULUMI_SUPPRESS_OUTPUTS: "true"
 
       - name: Get Pulumi outputs
         id: get-outputs

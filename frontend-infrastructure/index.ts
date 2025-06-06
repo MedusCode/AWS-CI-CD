@@ -1,7 +1,8 @@
-import { dnsRecord, frontendUrl } from "./dns";
+import * as compute from "./compute";
+import * as alb from "./alb";
+import { dnsRecordName, frontendUrl } from "./dns";
 import { instancePublicIp } from "./compute";
 
-export * from "./compute";
-export * from "./alb";
-export { frontendUrl, dnsRecord };
+export { frontendUrl, dnsRecordName };
 export { instancePublicIp };
+

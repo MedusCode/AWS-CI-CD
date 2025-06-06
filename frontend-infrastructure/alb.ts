@@ -1,11 +1,11 @@
 import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
-import { instance } from "./compute";
+import { instanceId } from "./compute";
 import { vpc, subnetIds, secGroup } from './network'
 import { certificateArn } from "./config";
 
 // Create Target Group for the instance
-export const targetGroup = new aws.lb.TargetGroup("frontend-tg", {
+const targetGroup = new aws.lb.TargetGroup("frontend-tg", {
   port: 80,
   protocol: "HTTP",
   targetType: "instance",
@@ -15,7 +15,7 @@ export const targetGroup = new aws.lb.TargetGroup("frontend-tg", {
 // Register instance to Target Group
 new aws.lb.TargetGroupAttachment("frontend-tg-attachment", {
   targetGroupArn: targetGroup.arn,
-  targetId: instance.id,
+  targetId: instanceId,
   port: 80,
 });
 
