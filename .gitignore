@@ -6,3 +6,5 @@ build/
 .env
 ansible/vars/
 .idea/
+/backend-infrastructure/trust-policy.json
+.DS_Store/
