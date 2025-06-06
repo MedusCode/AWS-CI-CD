@@ -22,9 +22,39 @@ env:
   PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
 
 jobs:
+  test:
+    name: Run Playwright Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Run login keyboard tests
+        run: npx playwright test ./tests/loginKeyboardTests.spec.js
+
+      - name: Run login visual tests
+        run: npx playwright test ./tests/loginVisualTests.spec.js
+
+      - name: Run create account dialog keyboard tests
+        run: npx playwright test tests/createAccountDialogKeyboardTests.spec.js
+
+      - name: Run create account dialog visual tests
+        run: npx playwright test tests/createAccountDialogVisualTests.spec.js
+
+      - name: Run accessibility tests
+        run: npx playwright test tests/accessibilityTests.spec.js
+
   build:
     name: Build and push Docker image
     runs-on: ubuntu-latest
+    needs: test
 
     steps:
       - name: Checkout code
