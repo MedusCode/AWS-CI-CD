@@ -61,19 +61,25 @@ jobs:
     name: Build and push Docker image
     runs-on: ubuntu-latest
     needs: test
+    outputs:
+      imageTag: ${{ steps.tag.outputs.tag }}
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Generate image tag
+        id: tag
+        run: echo "tag=$(date +'%Y%m%d%H%M%S')" >> "$GITHUB_OUTPUT"
+
       - name: Log in to GHCR
         run: echo "$github_token" | docker login ghcr.io -u "$github_username" --password-stdin
 
       - name: Build Docker image
-        run: docker build -t ghcr.io/$github_username/speedscore-api:latest .
+        run: docker build -t ghcr.io/$github_username/speedscore-api:${{ steps.tag.outputs.tag }} .
 
       - name: Push Docker image
-        run: docker push ghcr.io/$github_username/speedscore-api:latest
+        run: docker push ghcr.io/$github_username/speedscore-api:${{ steps.tag.outputs.tag }}
 
   deploy:
     name: Deploy backend to EKS
@@ -100,6 +106,7 @@ jobs:
           pulumi stack select dev
           pulumi config set aws:region us-west-2
           
+          pulumi config set speedscore_backend:imageTag ${{ needs.build.outputs.imageTag }}
           pulumi config set speedscore_backend:subDomain $sub_domain
           pulumi config set speedscore_backend:domain $domain
           pulumi config set --secret speedscore_backend:certificateArn "$certificateArn"

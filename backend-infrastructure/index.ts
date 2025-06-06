@@ -6,6 +6,7 @@ import * as k8s from "@pulumi/kubernetes";
 // Load config values
 const config = new pulumi.Config();
 
+const imageTag = config.require("imageTag");
 const certificateArn = config.requireSecret("certificateArn");
 const githubActionRoleArn = config.requireSecret("githubActionRoleArn");
 const githubToken = config.requireSecret("githubToken");
@@ -140,7 +141,7 @@ const apiDeployment = new k8s.apps.v1.Deployment("api-deployment", {
         containers: [
           {
             name: "api",
-            image: pulumi.interpolate`ghcr.io/${githubUsername}/speedscore-api:latest`,
+            image: pulumi.interpolate`ghcr.io/${githubUsername}/speedscore-api:${imageTag}`,
             ports: [{ containerPort: 4000 }],
             env: apiEnvVars,
             imagePullPolicy: "Always",
