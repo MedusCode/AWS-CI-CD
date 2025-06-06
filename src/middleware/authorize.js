@@ -109,5 +109,5 @@ export const authorize = (req, res, next) => {
       return next();
     }
   }
-  return next(new UnauthorizedError("User is not authorized to perform this action"));
+  return next(new UnauthorizedError(`${userId} || ${role} || ${resource} || ${resourceId} || ${action}`));
 }
