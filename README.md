@@ -11,4 +11,3 @@ Tagged code snapshots take the project from its initial state through its final 
  * view the code *at a specific point in the chapter* by checking out a tagged version of the code referenced in the chapter, e.g., `git checkout -b ch3s1`. Git tags are used to name each chapter's snapshots sequentially as ch*x*s*y*, where *x* is the chapter number and *y* is the snapshot number. Snapshots start at 0 for each chapter.
 
 For detailed instructions on how to get the most out of the book's companion code, please see Box 3.1 ("Exploring the Book's Code Using Git, GitHub and VSC") in Chapter 3.
-
