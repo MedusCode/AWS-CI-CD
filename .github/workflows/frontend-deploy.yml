@@ -103,9 +103,6 @@ jobs:
           echo "$aws_ssh" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
 
-      - name: lol
-        run: echo "${{ needs.infrastructure.outputs.instance_ip }} ansible_user=${{ needs.infrastructure.outputs.ansible_user }}"
-
       - name: Write inventory file
         run: |
           echo "[all]" > inventory.ini

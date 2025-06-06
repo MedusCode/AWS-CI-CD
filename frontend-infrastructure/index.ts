@@ -3,6 +3,6 @@ import * as alb from "./alb";
 import { dnsRecordName, frontendUrl } from "./dns";
 import { instancePublicIp } from "./compute";
 
-export { frontendUrl, dnsRecordName };
-export { instancePublicIp };
+export { frontendUrl, dnsRecordName, instancePublicIp };
+export const ansibleUser = "ubuntu";
 
