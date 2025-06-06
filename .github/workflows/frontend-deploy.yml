@@ -36,13 +36,14 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
 
-      - name: Start local server
-        run: npm start
+      - name: Start local server and wait
+        run: |
+          PORT=5500 npm start &
+          SERVER_PID=$!
+          echo "SERVER_PID=$SERVER_PID" >> $GITHUB_ENV
+          npx wait-on http://localhost:5500
         env:
           PORT: 5500
-
-      - name: Wait for server to be ready
-        run: npx wait-on http://localhost:5500
 
       - name: Run login keyboard tests
         run: npx playwright test ./tests/loginKeyboardTests.spec.js
@@ -58,6 +59,12 @@ jobs:
 
       - name: Run accessibility tests
         run: npx playwright test tests/accessibilityTests.spec.js
+
+      - name: Stop local server
+        if: always()
+        run: kill $SERVER_PID
+        env:
+          SERVER_PID: ${{ env.SERVER_PID }}
 
   build:
     name: Build and push Docker image
