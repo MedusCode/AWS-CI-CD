@@ -15,7 +15,7 @@ on:
       - 'package-lock.json'
       - 'Dockerfile'
       - 'docker-compose.yml'
-      - '.github/workflows/deploy-application.yml'
+      - '.github/workflows/application-deploy.yml'
 
 env:
   PORT: 4000
