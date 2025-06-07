@@ -6,8 +6,9 @@ export function createIngress(args: {
   apiService: k8s.core.v1.Service,
   namespace: k8s.core.v1.Namespace,
   k8sProvider: k8s.Provider
+  dependsOn?: pulumi.Input<pulumi.Resource> | pulumi.Input<pulumi.Resource>[];
 }) {
-  const { namespace, apiService, k8sProvider } = args;
+  const { namespace, apiService, k8sProvider, dependsOn } = args;
 
   const ingress = pulumi.all([
     apiService.metadata.name,
@@ -51,7 +52,7 @@ export function createIngress(args: {
           },
         ],
       },
-    }, { provider: k8sProvider });
+    }, { provider: k8sProvider, dependsOn });
   });
 
   const albHostname = ingress.status.loadBalancer.ingress[0].hostname;

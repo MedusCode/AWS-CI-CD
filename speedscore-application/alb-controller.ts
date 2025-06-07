@@ -37,5 +37,7 @@ export function createAlbController(args: {
         name: albServiceAccount.metadata.name,
       },
     },
-  }, { provider: k8sProvider, dependsOn: [albServiceAccount] });
+  }, { provider: k8sProvider, dependsOn: [ albServiceAccount ] });
+
+  return { albController };
 }

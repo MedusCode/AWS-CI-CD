@@ -16,7 +16,7 @@ const k8sProvider = new k8s.Provider("k8s-provider", {
   kubeconfig,
 });
 
-createAlbController({
+const { albController } = createAlbController({
   k8sProvider,
   clusterName,
   vpcId,
@@ -37,6 +37,7 @@ const { albHostname } = createIngress({
   apiService,
   namespace,
   k8sProvider,
+  dependsOn: [ albController ],
 });
 
 export { albHostname };
