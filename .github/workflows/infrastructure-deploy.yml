@@ -1,0 +1,52 @@
+name: Deploy Infrastructure
+
+permissions:
+  id-token: write
+  contents: read
+
+on:
+  push:
+    branches:
+      - backend-deploy-advanced
+    paths:
+      - 'speedscore-infrastructure/**'
+      - '.github/workflows/deploy-infrastructure.yml'
+
+env:
+  github_actions_role_arn: ${{ secrets.GH_ACTIONS_ROLE_ARN }}
+  PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+
+jobs:
+  deploy-infrastructure:
+    name: Deploy infrastructure to AWS
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ env.github_actions_role_arn }}
+          aws-region: us-west-2
+
+      - name: Install Pulumi dependencies
+        working-directory: ./speedscore-infrastructure
+        run: npm ci
+
+      - name: Configure Pulumi stack
+        working-directory: ./speedscore-infrastructure
+        run: |
+          pulumi stack select dev
+          pulumi config set aws:region us-west-2
+          pulumi config set --secret speedscore-infrastructure-advanced:githubActionRoleArn "$github_actions_role_arn"
+
+      - name: Deploy infrastructure
+        uses: pulumi/actions@v4
+        with:
+          work-dir: ./speedscore-infrastructure
+          command: up
+          stack-name: MedusCode-org/speedscore-infrastructure-advanced/dev
+        env:
+          PULUMI_SUPPRESS_OUTPUTS: "true"
