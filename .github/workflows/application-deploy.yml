@@ -20,7 +20,7 @@ on:
 env:
   PORT: 4000
   NODE_ENV: production
-  API_DEPLOYMENT_URL: https://api.medus.click
+  API_DEPLOYMENT_URL: https://api-advanced.medus.click
   CLIENT_DEPLOYMENT_URL: https://speedscore.medus.click
   COOKIE_DOMAIN: .medus.click
   ACCESS_TOKEN_DURATION: 1d
@@ -38,7 +38,7 @@ env:
   github_token: ${{ secrets.TOKEN }}
   github_username: meduscode
   domain: medus.click
-  sub_domain: api
+  sub_domain: api-advanced
   PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
 
 jobs:
