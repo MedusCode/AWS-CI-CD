@@ -3,7 +3,6 @@ import * as pulumi from "@pulumi/pulumi";
 const config = new pulumi.Config();
 
 export const certificateArn = config.requireSecret("certificateArn");
-export const githubActionRoleArn = config.requireSecret("githubActionRoleArn");
 export const githubToken = config.requireSecret("githubToken");
 export const githubUsername = config.requireSecret("githubUsername");
 export const subDomain = config.require("subDomain");

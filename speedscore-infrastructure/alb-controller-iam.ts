@@ -1,7 +1,6 @@
 import * as aws from "@pulumi/aws";
-import * as k8s from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
-import { cluster, k8sProvider } from "./cluster";
+import { cluster } from "./cluster";
 
 const oidcProvider = cluster.core.oidcProvider!;
 
@@ -15,7 +14,7 @@ const oidcArn = oidcProvider.apply(p => {
   return p.arn;
 });
 
-const albControllerPolicy = new aws.iam.Policy("albControllerPolicy", {
+const albControllerPolicy = new aws.iam.Policy("albControllerPolicy-adv", {
   description: "ALB Controller access policy",
   policy: JSON.stringify({
     Version: "2012-10-17",
@@ -48,7 +47,7 @@ const albControllerPolicy = new aws.iam.Policy("albControllerPolicy", {
   }),
 });
 
-const albControllerRole = new aws.iam.Role("albControllerRole", {
+const albControllerRole = new aws.iam.Role("albControllerRole-adv", {
   assumeRolePolicy: pulumi.all([oidcUrl, oidcArn]).apply(([url, arn]) =>
     JSON.stringify({
       Version: "2012-10-17",
@@ -70,37 +69,9 @@ const albControllerRole = new aws.iam.Role("albControllerRole", {
   ),
 });
 
-new aws.iam.RolePolicyAttachment("albControllerPolicyAttach", {
+new aws.iam.RolePolicyAttachment("albControllerPolicyAttach-adv", {
   role: albControllerRole.name,
   policyArn: albControllerPolicy.arn,
 });
 
-const albServiceAccount = new k8s.core.v1.ServiceAccount("aws-load-balancer-controller-sa", {
-  metadata: {
-    name: "aws-load-balancer-controller",
-    namespace: "kube-system",
-    annotations: {
-      "eks.amazonaws.com/role-arn": albControllerRole.arn,
-    },
-  },
-}, { provider: k8sProvider });
-
-export const albController = new k8s.helm.v3.Chart("aws-load-balancer-controller", {
-  chart: "aws-load-balancer-controller",
-  version: "1.7.1",
-  fetchOpts: {
-    repo: "https://aws.github.io/eks-charts",
-  },
-  namespace: "kube-system",
-  values: {
-    clusterName: cluster.eksCluster.name,
-    serviceAccount: {
-      create: false,
-      name: albServiceAccount.metadata.name,
-    },
-    region: "us-west-2",
-    vpcId: cluster.eksCluster.vpcConfig.vpcId,
-    enableWaf: false,
-    enableWafv2: false,
-  },
-}, { provider: k8sProvider, dependsOn: [albServiceAccount] });
+export const albControllerRoleArn = albControllerRole.arn;

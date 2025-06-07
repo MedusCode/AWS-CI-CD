@@ -1,5 +1,5 @@
-name: speedscore_backend
-description: A minimal AWS TypeScript Pulumi program
+name: speedscore-infrastructure-advanced
+description: Infrastructure stack (EKS, IAM, etc.)
 runtime:
   name: nodejs
   options:

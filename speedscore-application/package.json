@@ -1,5 +1,5 @@
 {
-    "name": "speedscore_backend",
+    "name": "speedscore-application-advanced",
     "main": "index.ts",
     "devDependencies": {
         "@types/node": "^18",
@@ -8,9 +8,7 @@
     "dependencies": {
         "@pulumi/aws": "^6.0.0",
         "@pulumi/awsx": "^2.0.2",
-        "@pulumi/eks": "^3.9.1",
         "@pulumi/kubernetes": "^4.23.0",
-        "@pulumi/mongodbatlas": "^3.32.1",
         "@pulumi/pulumi": "^3.113.0"
     }
 }
