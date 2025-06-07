@@ -4,3 +4,4 @@ ChrisWebDevBookAPIKey.pem
 .ssh/
 build/
 .idea/
+.DS_store
