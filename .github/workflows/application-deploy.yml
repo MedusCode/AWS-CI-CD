@@ -7,7 +7,15 @@ permissions:
 on:
   push:
     branches:
-      - backend-deploy
+      - backend-deploy-advanced
+    paths:
+      - 'speedscore-application/**'
+      - 'src/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'Dockerfile'
+      - 'docker-compose.yml'
+      - '.github/workflows/deploy-application.yml'
 
 env:
   PORT: 4000
@@ -25,7 +33,7 @@ env:
   SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
   GH_CLIENT_ID: ${{ secrets.GH_CLIENT_ID }}
   GH_CLIENT_SECRET: ${{ secrets.GH_CLIENT_SECRET }}
-  certificateArn: ${{ secrets.CERTIFICATE_ARN }}
+  certificateArn: ${{ secrets.CERTIFICATE_ARN_ADV }}
   github_actions_role_arn: ${{ secrets.GH_ACTIONS_ROLE_ARN }}
   github_token: ${{ secrets.TOKEN }}
   github_username: meduscode
@@ -97,45 +105,44 @@ jobs:
           aws-region: us-west-2
 
       - name: Install Pulumi dependencies
-        working-directory: ./backend-infrastructure
+        working-directory: ./speedscore-application
         run: npm ci
 
       - name: Configure Pulumi stack
-        working-directory: ./backend-infrastructure
+        working-directory: ./speedscore-application
         run: |
           pulumi stack select dev
           pulumi config set aws:region us-west-2
           
-          pulumi config set speedscore_backend:imageTag ${{ needs.build.outputs.imageTag }}
-          pulumi config set speedscore_backend:subDomain $sub_domain
-          pulumi config set speedscore_backend:domain $domain
-          pulumi config set --secret speedscore_backend:certificateArn "$certificateArn"
-          pulumi config set --secret speedscore_backend:githubToken "$github_token"
-          pulumi config set --secret speedscore_backend:githubActionRoleArn "$github_actions_role_arn"
-          pulumi config set --secret speedscore_backend:githubUsername $github_username
+          pulumi config set speedscore-application-advanced:imageTag ${{ needs.build.outputs.imageTag }}
+          pulumi config set speedscore-application-advanced:subDomain $sub_domain
+          pulumi config set speedscore-application-advanced:domain $domain
+          pulumi config set --secret speedscore-application-advanced:certificateArn "$certificateArn"
+          pulumi config set --secret speedscore-application-advanced:githubToken "$github_token"
+          pulumi config set --secret speedscore-application-advanced:githubUsername $github_username
           
           
-          pulumi config set speedscore_backend:nodeEnv $NODE_ENV
-          pulumi config set speedscore_backend:port $PORT
-          pulumi config set speedscore_backend:cookieDomain $COOKIE_DOMAIN
-          pulumi config set speedscore_backend:clientDeploymentUrl $CLIENT_DEPLOYMENT_URL
-          pulumi config set speedscore_backend:apiDeploymentUrl $API_DEPLOYMENT_URL
-          pulumi config set speedscore_backend:accessTokenDuration $ACCESS_TOKEN_DURATION
-          pulumi config set speedscore_backend:refreshTokenDuration $REFRESH_TOKEN_DURATION
-          pulumi config set speedscore_backend:sendgridFromAddress $SENDGRID_FROM_ADDRESS
-          pulumi config set --secret speedscore_backend:jwtSecret "$JWT_SECRET"
-          pulumi config set --secret speedscore_backend:mongodbUri "$MONGODB_URI"
-          pulumi config set --secret speedscore_backend:sessionSecret "$SESSION_SECRET"
-          pulumi config set --secret speedscore_backend:mfaEncryptionKey "$MFA_ENCRYPTION_KEY"
-          pulumi config set --secret speedscore_backend:sendgridApiKey "$SENDGRID_API_KEY"
-          pulumi config set --secret speedscore_backend:ghClientId "$GH_CLIENT_ID"
-          pulumi config set --secret speedscore_backend:ghClientSecret "$GH_CLIENT_SECRET"
+          pulumi config set speedscore-application-advanced:nodeEnv $NODE_ENV
+          pulumi config set speedscore-application-advanced:port $PORT
+          pulumi config set speedscore-application-advanced:cookieDomain $COOKIE_DOMAIN
+          pulumi config set speedscore-application-advanced:clientDeploymentUrl $CLIENT_DEPLOYMENT_URL
+          pulumi config set speedscore-application-advanced:apiDeploymentUrl $API_DEPLOYMENT_URL
+          pulumi config set speedscore-application-advanced:accessTokenDuration $ACCESS_TOKEN_DURATION
+          pulumi config set speedscore-application-advanced:refreshTokenDuration $REFRESH_TOKEN_DURATION
+          pulumi config set speedscore-application-advanced:sendgridFromAddress $SENDGRID_FROM_ADDRESS
+          pulumi config set --secret speedscore-application-advanced:jwtSecret "$JWT_SECRET"
+          pulumi config set --secret speedscore-application-advanced:mongodbUri "$MONGODB_URI"
+          pulumi config set --secret speedscore-application-advanced:sessionSecret "$SESSION_SECRET"
+          pulumi config set --secret speedscore-application-advanced:mfaEncryptionKey "$MFA_ENCRYPTION_KEY"
+          pulumi config set --secret speedscore-application-advanced:sendgridApiKey "$SENDGRID_API_KEY"
+          pulumi config set --secret speedscore-application-advanced:ghClientId "$GH_CLIENT_ID"
+          pulumi config set --secret speedscore-application-advanced:ghClientSecret "$GH_CLIENT_SECRET"
 
-      - name: Deploy to EKS
+      - name: Deploy app to EKS
         uses: pulumi/actions@v4
         with:
-          work-dir: ./backend-infrastructure
+          work-dir: ./speedscore-application
           command: up
-          stack-name: MedusCode-org/speedscore_backend/dev
+          stack-name: MedusCode-org/speedscore-application-advanced/dev
         env:
           PULUMI_SUPPRESS_OUTPUTS: "true"
