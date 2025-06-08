@@ -19,4 +19,3 @@ export const cluster = new eks.Cluster("speedscore-cluster-adv", {
   ],
   createOidcProvider: true,
 });
-
