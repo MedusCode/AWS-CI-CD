@@ -112,4 +112,3 @@ console.log(`SpeedScore API Version 1.0.0 (14-Sep-2024)`);
 const server = app.listen(port, () => console.log(`Server running on port ${port}...`));
 
 export { app, server, db, mongoClient};
-
