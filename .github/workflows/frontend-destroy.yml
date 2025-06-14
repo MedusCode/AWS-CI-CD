@@ -1,0 +1,52 @@
+name: Destroy Frontend
+
+on:
+  workflow_dispatch:
+
+env:
+  github_username: meduscode
+  aws_ssh_name: aws_cs561
+  aws_region: us-west-2
+  domain: medus.click
+  sub_domain: speedscore
+  github_token: ${{ secrets.TOKEN }}
+  aws_ssh: ${{ secrets.AWS_CS561_SSH }}
+  github_actions_role_arn: ${{ secrets.GH_ACTIONS_ROLE_ARN }}
+  certificateArn: ${{ secrets.CERTIFICATE_ARN }}
+  PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+
+jobs:
+  destroy:
+    name: Destroy Frontend
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ env.github_actions_role_arn }}
+          aws-region: us-west-2
+
+      - name: Install dependencies
+        working-directory: ./frontend-infrastructure
+        run: npm ci
+
+      - name: Configure Pulumi stack
+        working-directory: ./frontend-infrastructure
+        run: |
+          pulumi stack select dev
+          pulumi config set aws:region "$aws_region"
+          pulumi config set domain "$domain"
+          pulumi config set subDomain "$sub_domain"
+          pulumi config set sshKeyName "$aws_ssh_name"
+          pulumi config set --secret certificateArn "$certificateArn"
+
+      - name: Deploy with Pulumi
+        uses: pulumi/actions@v4
+        with:
+          work-dir: ./frontend-infrastructure
+          command: destroy
+          stack-name: MedusCode-org/frontend-infrastructure/dev
