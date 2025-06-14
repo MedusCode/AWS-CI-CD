@@ -1,7 +1,9 @@
 name: Destroy Frontend
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - frontend-deploy
 
 env:
   github_username: meduscode

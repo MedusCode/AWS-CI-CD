@@ -7,7 +7,7 @@ permissions:
 on:
   push:
     branches:
-      - frontend-deploy
+      - main
 
 env:
   github_username: meduscode
